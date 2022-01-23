@@ -13,6 +13,13 @@ class ViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        let urlString = "https://www.hackingwithswift.com/samples/petitions-1.json"
+        
+        if let url = URL(string: urlString){
+            if let data = try? Data(contentsOf: url){
+                //Ready to parse the data
+            }
+        }
     }
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return petitions.count
