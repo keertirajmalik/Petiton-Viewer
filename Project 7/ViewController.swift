@@ -9,10 +9,12 @@ import UIKit
 
 class ViewController: UITableViewController {
     var petitions = [Petition]()
-
+    var originalPetitions = [Petition]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Credits", style: .plain, target: self, action: #selector(showCredits))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: #selector(showFilterAlert))
         // Do any additional setup after loading the view.
         let urlString: String
         
@@ -43,7 +45,7 @@ class ViewController: UITableViewController {
         cell.detailTextLabel?.text = petition.body
         return cell
     }
-
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let vc = DetailViewController()
         vc.detailItem = petitions[indexPath.row]
@@ -69,9 +71,37 @@ extension ViewController {
         
         if let jsonPetitions = try? decoder.decode(Petitions.self, from: json) {
             petitions = jsonPetitions.results
+            originalPetitions = petitions
             tableView.reloadData()
         }
     }
-   
+    
+    @objc func showFilterAlert() {
+        let ac = UIAlertController(title: "Filter Text", message: nil, preferredStyle: .alert)
+        ac.addTextField()
+        
+        let submitAction = UIAlertAction(title:"Submit", style: .default) { [weak self, weak ac] action in
+            guard let filterText = ac?.textFields?[0].text else { return }
+            self?.submit(filterText)
+        }
+        
+        ac.addAction(submitAction)
+        present(ac, animated: true)
+    }
+    
+    func submit(_ filterText: String) {
+        if !filterText.isEmpty {
+            petitions.removeAll()
+            for petition in originalPetitions {
+                if petition.title.lowercased().contains(filterText.lowercased()) {
+                    petitions.append(petition)
+                }
+            }
+            tableView.reloadData()
+        } else {
+            petitions = originalPetitions
+            tableView.reloadData()
+        }
+    }
 }
 
